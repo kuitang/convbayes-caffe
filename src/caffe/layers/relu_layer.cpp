@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <vector>
+#include <string>
+#include <iostream>
 
 #include "caffe/layer.hpp"
 #include "caffe/vision_layers.hpp"
@@ -13,9 +15,16 @@ void ReLULayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   Dtype* top_data = top[0]->mutable_cpu_data();
   const int count = bottom[0]->count();
   Dtype negative_slope = this->layer_param_.relu_param().negative_slope();
+  
+  std::string str1("relu7");
+  if(str1.compare(this->layer_param_.name())==0){
+	printf("%s\n",this->layer_param_.name().c_str());
+  }
+
   for (int i = 0; i < count; ++i) {
     top_data[i] = std::max(bottom_data[i], Dtype(0))
         + negative_slope * std::min(bottom_data[i], Dtype(0));
+    //printf("%10.5f\n",top_data[i]);
   }
 }
 
