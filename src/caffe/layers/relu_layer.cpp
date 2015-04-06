@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 
 #include "caffe/layer.hpp"
 #include "caffe/vision_layers.hpp"
@@ -33,6 +34,7 @@ void ReLULayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     if(correct_layer){
 	//printf("%10.5f\n",top_data[i]);
 	myfile << std::setprecision(15) << top_data[i] << '\n';
+    }
   }
 
   if(correct_layer){
