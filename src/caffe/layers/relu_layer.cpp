@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <fstream>
 
 #include "caffe/layer.hpp"
 #include "caffe/vision_layers.hpp"
@@ -15,16 +16,27 @@ void ReLULayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   Dtype* top_data = top[0]->mutable_cpu_data();
   const int count = bottom[0]->count();
   Dtype negative_slope = this->layer_param_.relu_param().negative_slope();
-  
+
+  bool correct_layer=false;  
   std::string str1("relu7");
+  std::ofstream myfile;
+
   if(str1.compare(this->layer_param_.name())==0){
-	printf("%s\n",this->layer_param_.name().c_str());
+	//printf("%s\n",this->layer_param_.name().c_str());
+	correct_layer=true;
+	myfile.open("example.txt");
   }
 
   for (int i = 0; i < count; ++i) {
     top_data[i] = std::max(bottom_data[i], Dtype(0))
         + negative_slope * std::min(bottom_data[i], Dtype(0));
-    //printf("%10.5f\n",top_data[i]);
+    if(correct_layer){
+	//printf("%10.5f\n",top_data[i]);
+	myfile << std::setprecision(15) << top_data[i] << '\n';
+  }
+
+  if(correct_layer){
+	myfile.close();
   }
 }
 
