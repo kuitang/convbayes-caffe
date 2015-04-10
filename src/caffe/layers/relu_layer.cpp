@@ -10,7 +10,6 @@
 
 namespace caffe {
 
-static int call_count = 0;
 
 template <typename Dtype>
 void ReLULayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
@@ -24,13 +23,14 @@ void ReLULayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   std::string str1("relu7");
   //std::ofstream myfile;
   FILE * myfile;
-
+  int call_count = 0; 
+  char *filename = new char[1000];
+ 
   if(str1.compare(this->layer_param_.name())==0){
-	char *filename = new char[1000];
 	//printf("%s\n",this->layer_param_.name().c_str());
 	correct_layer=true;
 	//myfile.open("example.txt");
-	sprintf(filename, "example_%d.txt", call_count);
+	sprintf(filename, "vec_%d.txt", call_count);
 	myfile= fopen(filename,"w");
   }
 
@@ -41,12 +41,14 @@ void ReLULayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
         + negative_slope * std::min(bottom_data[i], Dtype(0));
     if(correct_layer){
 	if(i>0 && (i%4096==0)) {
-		fprintf(myfile, "\n");
+		filename =new char[1000];
+		fclose(myfile);
+		call_count++;
+		sprintf(filename, "vec_%d.txt", call_count);
+		myfile= fopen(filename,"w");
+		//fprintf(myfile, "\n");
 	}
-	fprintf(myfile, "%20.19e ", (double) top_data[i]);
-	if(i==0){
-		printf("%20.19e\n", top_data[i]);
-	}
+	fprintf(myfile, "%20.19e\n", (double) top_data[i]);
 	//myfile << std::setprecision(20) << top_data[i] << '\n';
     }
   }
@@ -54,7 +56,7 @@ void ReLULayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   if(correct_layer){
 	//myfile.close();
 	fclose(myfile);
-	call_count++;
+	//call_count++;
   }
 }
 
