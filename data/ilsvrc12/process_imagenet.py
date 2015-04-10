@@ -5,6 +5,7 @@ import caffe
 import wget
 import os
 import time
+import subprocess
 
 def pre_process(limit,net,classes):
     syn_ids=[]
@@ -16,30 +17,39 @@ def pre_process(limit,net,classes):
 		synset=comps[0]
 		if len(synset)>0:
 			syn_ids.append(synset)
+    print 'Total Classes (synsets): '+str(len(syn_ids))
 
     #for each synset, for each image convert to weights
     j=0
+    images=[]
     last=time.time()
     for synset in syn_ids:
 	if j<classes:
-		if j%10==0:
+		if j%10==0 and j!=0:
 			print "Finished "+str(j)+" took: "+str(time.time()-last)
 			last=time.time()
 		j+=1
 		k=0
-		for image in os.listdir('unzipped/'+synet+'/'):
+		subprocess.call(['sudo','mkdir','conv_weights/'+str(synset)])
+		for image in os.listdir('unzipped_data/'+str(synset)+'/'):
 			if k<limit:
+				k+=1
+				valid=True
 				try: 
-					input_image = caffe.io.load_image('unzipped/'+image)
-                                except:
+					input_image = caffe.io.load_image('unzipped_data/'+str(synset)+'/'+image)
+                                	images.append(input_image)
+				except:
                                         #os.remove(filename)
                                         valid=False
                                 if valid:
-                                        prediction = net.predict([input_image])
-
-                                        #have to move file to correct folder
-                                        os.rename('example.txt',"unzipped/"+str(synset)+'/'+image[:-5]+'.weights')
-                                        #delete image
+					if k==0:
+						#print 'Predicting: '+str(image)
+                                        	b=time.time()
+						prediction = net.predict([input_image],oversample=False)
+						print 'Time: '+str(time.time()-b)
+                                        	#have to move file to correct folder
+                                        	#os.rename('example.txt',"conv_weights/"+str(synset)+'/'+image[:-5]+'.weights')
+                                        	#delete image
                                         			  
 
 def initalize():
@@ -59,8 +69,9 @@ def initalize():
     return net
 
 
-net=initalize()
-start=time.time()
-pre_process(10,net,1)
+if __name__=="__main__":
+	net=initalize()
+	start=time.time()
+	pre_process(10,net,1) #limit,net,classes
 
 print 'Finished took: '+str(time.time()-start)
