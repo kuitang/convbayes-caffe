@@ -19,13 +19,13 @@ void ReLULayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   const int count = bottom[0]->count();
   Dtype negative_slope = this->layer_param_.relu_param().negative_slope();
 
-  bool correct_layer=false;  
+  bool correct_layer=false;
   std::string str1("relu7");
   //std::ofstream myfile;
   FILE * myfile;
-  int call_count = 0; 
+  int call_count = 0;
   char *filename = new char[1000];
- 
+
   if(str1.compare(this->layer_param_.name())==0){
 	//printf("%s\n",this->layer_param_.name().c_str());
 	correct_layer=true;
@@ -40,16 +40,16 @@ void ReLULayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     top_data[i] = std::max(bottom_data[i], Dtype(0))
         + negative_slope * std::min(bottom_data[i], Dtype(0));
     if(correct_layer){
-	if(i>0 && (i%4096==0)) {
-		filename =new char[1000];
-		fclose(myfile);
-		call_count++;
-		sprintf(filename, "vec_%d.txt", call_count);
-		myfile= fopen(filename,"w");
-		//fprintf(myfile, "\n");
-	}
-	fprintf(myfile, "%20.19e\n", (double) top_data[i]);
-	//myfile << std::setprecision(20) << top_data[i] << '\n';
+        if(i>0 && (i%4096==0)) {
+            // Switch files
+            fclose(myfile);
+            call_count++;
+            sprintf(filename, "vec_%d.txt", call_count);
+            myfile= fopen(filename,"w");
+            //fprintf(myfile, "\n");
+        }
+        fprintf(myfile, "%20.19e\n", (double) top_data[i]);
+        //myfile << std::setprecision(20) << top_data[i] << '\n';
     }
   }
 
@@ -58,6 +58,8 @@ void ReLULayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
 	fclose(myfile);
 	//call_count++;
   }
+
+  delete[] filename;
 }
 
 template <typename Dtype>
