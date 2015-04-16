@@ -6,6 +6,7 @@ import wget
 import os
 import time
 import subprocess
+import shutil
 
 def chunks(l, n):
     """ Yield successive n-sized chunks from l.
@@ -34,7 +35,7 @@ def pre_process(limit,net,start,end):
         	print "Finished "+str(j)+" took: "+str(time.time()-last)
                 last=time.time()
         j+=1
-        subprocess.call(['sudo','mkdir','../conv_weights/'+str(synset)])
+        subprocess.call(['sudo','mkdir','../unzipped_data/conv_weights_2/'+str(synset)])
         class_images=[i for i in  os.listdir('../unzipped_data/'+str(synset)+'/')]
 	image_batches=chunks(class_images,10)
 	t=1
@@ -46,17 +47,18 @@ def pre_process(limit,net,start,end):
                     images.append(input_image)
                          
                 if len(images)>0:
-                    prediction = net.predict([input_image],oversample=False)
+                    prediction = net.predict(images,oversample=False)
                         
 		#save prediction softmax to files
-		np.savetxt('../softmax/'+str(synset)+'_'+str(t)+".softmax", prediction)
+		np.savetxt('../unzipped_data/softmax/'+str(synset)+'_'+str(t)+".softmax", prediction)
 		t+=1                        
 		     
 		for g in range(len(batch)):
 			#have to move file to correct folder
                 	img=batch[g]
-			os.rename('vec_'+str(g)+'.txt',"../conv_weights/"+str(synset)+'/'+img[:-5]+'.weights')
-
+			os.rename('vec_'+str(g)+'.txt',img[:-5]+'.weights')
+			shutil.copy(img[:-5]+'.weights','../unzipped_data/conv_weights_2/'+str(synset)+'/')
+			os.remove(img[:-5]+'.weights')
 
 
 def initalize():
